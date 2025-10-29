@@ -28,9 +28,77 @@ function getUserId(request: Request): string {
 }
 
 /**
- * Call Perplexity Search API for real-time data
+ * Domain filters for travel booking websites
  */
-async function searchPerplexity(query: string): Promise<any> {
+const TRAVEL_DOMAINS = {
+  flights: [
+    'expedia.com',
+    'kayak.com',
+    'skyscanner.com',
+    'google.com/flights',
+    'united.com',
+    'delta.com',
+    'american.com',
+    'southwest.com',
+    'jetblue.com',
+    'alaskaair.com',
+    'spirit.com',
+    'frontier.com',
+    'priceline.com',
+    'orbitz.com',
+    'cheapoair.com',
+    'momondo.com',
+    'hipmunk.com',
+    'booking.com/flights'
+  ],
+  hotels: [
+    'booking.com',
+    'expedia.com',
+    'hotels.com',
+    'priceline.com',
+    'orbitz.com',
+    'kayak.com',
+    'trivago.com',
+    'agoda.com',
+    'marriott.com',
+    'hilton.com',
+    'ihg.com',
+    'hyatt.com',
+    'accor.com',
+    'choicehotels.com',
+    'wyndhamhotels.com',
+    'bestwestern.com',
+    'sheraton.com',
+    'westin.com',
+    'ritzcarlton.com',
+    'fourseasons.com'
+  ],
+  cars: [
+    'enterprise.com',
+    'hertz.com',
+    'avis.com',
+    'budget.com',
+    'nationalcar.com',
+    'alamo.com',
+    'thrifty.com',
+    'dollar.com',
+    'expedia.com',
+    'kayak.com',
+    'priceline.com',
+    'orbitz.com',
+    'rentalcars.com',
+    'autoeurope.com',
+    'carrentals.com',
+    'hotwire.com',
+    'costcotravel.com',
+    'aaa.com'
+  ]
+};
+
+/**
+ * Call Perplexity Search API for real-time data with domain filtering
+ */
+async function searchPerplexity(query: string, searchType: 'flights' | 'hotels' | 'cars'): Promise<any> {
   const apiKey = process.env.PERPLEXITY_API_KEY || import.meta.env.PERPLEXITY_API_KEY;
 
   console.log('🔑 Perplexity API key:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT FOUND');
@@ -41,7 +109,12 @@ async function searchPerplexity(query: string): Promise<any> {
   }
 
   try {
-    console.log('📡 Calling Perplexity API...');
+    console.log(`📡 Calling Perplexity API for ${searchType}...`);
+    
+    // Get domain filter for the search type
+    const domainFilter = TRAVEL_DOMAINS[searchType];
+    console.log(`🎯 Filtering to ${domainFilter.length} travel domains`);
+
     const response = await fetch('https://api.perplexity.ai/search', {
       method: 'POST',
       headers: {
@@ -52,6 +125,7 @@ async function searchPerplexity(query: string): Promise<any> {
         query,
         max_results: 5,
         max_tokens_per_page: 512,
+        search_domain_filter: domainFilter
       }),
     });
 
@@ -87,18 +161,37 @@ function extractPrice(text: string, fallbackMin: number, fallbackMax: number): n
 }
 
 /**
+ * Extract booking URLs from Perplexity response
+ */
+function extractBookingUrls(searchResult: any): string[] {
+  const urls: string[] = [];
+  
+  if (searchResult.results && Array.isArray(searchResult.results)) {
+    searchResult.results.forEach((result: any) => {
+      if (result.url) {
+        urls.push(result.url);
+      }
+    });
+  }
+  
+  return urls.slice(0, 3); // Return up to 3 booking URLs
+}
+
+/**
  * Check flight prices using Perplexity API
  */
 async function checkFlightPrices(origin: string, destination: string, startDate: string): Promise<any> {
   const query = `What is the current average flight price from ${origin} to ${destination} for travel on ${startDate}? Include airline options.`;
 
   console.log(`🔍 Searching flights: ${query}`);
-  const searchResult = await searchPerplexity(query);
+  const searchResult = await searchPerplexity(query, 'flights');
 
-  if (searchResult && searchResult.answer) {
-    console.log(`✅ Perplexity flight result:`, searchResult.answer.substring(0, 200));
+  if (searchResult && (searchResult.answer || searchResult.results)) {
+    const text = searchResult.answer || (searchResult.results && searchResult.results.map((r: any) => r.snippet || r.title || '').join(' ')) || '';
+    console.log(`✅ Perplexity flight result:`, text ? text.substring(0, 200) : 'No text found');
 
-    const price = extractPrice(searchResult.answer, 400, 900);
+    const price = extractPrice(text, 400, 900);
+    const bookingUrls = extractBookingUrls(searchResult);
 
     // Extract airline from response or use defaults
     const airlines = ['United', 'Delta', 'American', 'Southwest', 'JetBlue'];
@@ -109,7 +202,8 @@ async function checkFlightPrices(origin: string, destination: string, startDate:
       carrier: airline,
       withinBudget: false, // Will be set later
       source: 'perplexity',
-      searchResult: searchResult.answer.substring(0, 300),
+      searchResult: text.substring(0, 300),
+      bookingUrls,
     };
   }
 
@@ -118,12 +212,21 @@ async function checkFlightPrices(origin: string, destination: string, startDate:
   const basePrice = 400 + Math.random() * 500;
   const variance = -100 + Math.random() * 200;
   const airlines = ['United', 'Delta', 'American', 'Southwest', 'JetBlue'];
+  const airline = airlines[Math.floor(Math.random() * airlines.length)];
+
+  // Generate realistic booking URLs
+  const bookingUrls = [
+    `https://www.${airline.toLowerCase()}.com/flights/${origin.toLowerCase()}-${destination.toLowerCase()}`,
+    `https://www.expedia.com/flights/${origin.toLowerCase()}-${destination.toLowerCase()}`,
+    `https://www.kayak.com/flights/${origin.toLowerCase()}-${destination.toLowerCase()}`
+  ];
 
   return {
     price: Math.round(basePrice + variance),
-    carrier: airlines[Math.floor(Math.random() * airlines.length)],
+    carrier: airline,
     withinBudget: false,
     source: 'simulation',
+    bookingUrls,
   };
 }
 
@@ -134,12 +237,14 @@ async function checkHotelPrices(destination: string, startDate: string): Promise
   const query = `What is the average hotel price per night in ${destination} for ${startDate}? Include hotel names and star ratings.`;
 
   console.log(`🔍 Searching hotels: ${query}`);
-  const searchResult = await searchPerplexity(query);
+  const searchResult = await searchPerplexity(query, 'hotels');
 
-  if (searchResult && searchResult.answer) {
-    console.log(`✅ Perplexity hotel result:`, searchResult.answer.substring(0, 200));
+  if (searchResult && (searchResult.answer || searchResult.results)) {
+    const text = searchResult.answer || (searchResult.results && searchResult.results.map((r: any) => r.snippet || r.title || '').join(' ')) || '';
+    console.log(`✅ Perplexity hotel result:`, text ? text.substring(0, 200) : 'No text found');
 
-    const pricePerNight = extractPrice(searchResult.answer, 80, 280);
+    const pricePerNight = extractPrice(text, 80, 280);
+    const bookingUrls = extractBookingUrls(searchResult);
 
     const hotelNames = ['Marriott', 'Hilton', 'Hyatt', 'Holiday Inn', 'Best Western', 'Sheraton'];
     const name = hotelNames[Math.floor(Math.random() * hotelNames.length)];
@@ -149,7 +254,8 @@ async function checkHotelPrices(destination: string, startDate: string): Promise
       name,
       withinBudget: false,
       source: 'perplexity',
-      searchResult: searchResult.answer.substring(0, 300),
+      searchResult: text.substring(0, 300),
+      bookingUrls,
     };
   }
 
@@ -158,12 +264,21 @@ async function checkHotelPrices(destination: string, startDate: string): Promise
   const basePrice = 80 + Math.random() * 200;
   const variance = -40 + Math.random() * 80;
   const hotelNames = ['Marriott', 'Hilton', 'Hyatt', 'Holiday Inn', 'Best Western', 'Sheraton'];
+  const name = hotelNames[Math.floor(Math.random() * hotelNames.length)];
+
+  // Generate realistic booking URLs
+  const bookingUrls = [
+    `https://www.${name.toLowerCase().replace(' ', '')}.com/hotels/${destination.toLowerCase()}`,
+    `https://www.booking.com/searchresults.html?ss=${destination}`,
+    `https://www.hotels.com/search.do?destination=${destination}`
+  ];
 
   return {
     pricePerNight: Math.round(basePrice + variance),
-    name: hotelNames[Math.floor(Math.random() * hotelNames.length)],
+    name,
     withinBudget: false,
     source: 'simulation',
+    bookingUrls,
   };
 }
 
@@ -174,12 +289,14 @@ async function checkCarPrices(destination: string, startDate: string): Promise<a
   const query = `What is the average car rental price per day in ${destination} for ${startDate}? Include rental companies.`;
 
   console.log(`🔍 Searching car rentals: ${query}`);
-  const searchResult = await searchPerplexity(query);
+  const searchResult = await searchPerplexity(query, 'cars');
 
-  if (searchResult && searchResult.answer) {
-    console.log(`✅ Perplexity car rental result:`, searchResult.answer.substring(0, 200));
+  if (searchResult && (searchResult.answer || searchResult.results)) {
+    const text = searchResult.answer || (searchResult.results && searchResult.results.map((r: any) => r.snippet || r.title || '').join(' ')) || '';
+    console.log(`✅ Perplexity car rental result:`, text ? text.substring(0, 200) : 'No text found');
 
-    const pricePerDay = extractPrice(searchResult.answer, 30, 100);
+    const pricePerDay = extractPrice(text, 30, 100);
+    const bookingUrls = extractBookingUrls(searchResult);
 
     const carTypes = ['Economy', 'Compact', 'Mid-size', 'Full-size', 'SUV'];
     const type = carTypes[Math.floor(Math.random() * carTypes.length)];
@@ -189,7 +306,8 @@ async function checkCarPrices(destination: string, startDate: string): Promise<a
       type,
       withinBudget: false,
       source: 'perplexity',
-      searchResult: searchResult.answer.substring(0, 300),
+      searchResult: text.substring(0, 300),
+      bookingUrls,
     };
   }
 
@@ -198,12 +316,21 @@ async function checkCarPrices(destination: string, startDate: string): Promise<a
   const basePrice = 30 + Math.random() * 70;
   const variance = -20 + Math.random() * 40;
   const carTypes = ['Economy', 'Compact', 'Mid-size', 'Full-size', 'SUV'];
+  const type = carTypes[Math.floor(Math.random() * carTypes.length)];
+
+  // Generate realistic booking URLs
+  const bookingUrls = [
+    `https://www.enterprise.com/en/car-rental/locations/us/${destination.toLowerCase()}.html`,
+    `https://www.hertz.com/rentacar/location/us/${destination.toLowerCase()}`,
+    `https://www.avis.com/en/locations/us/${destination.toLowerCase()}`
+  ];
 
   return {
     pricePerDay: Math.round(basePrice + variance),
-    type: carTypes[Math.floor(Math.random() * carTypes.length)],
+    type,
     withinBudget: false,
     source: 'simulation',
+    bookingUrls,
   };
 }
 
