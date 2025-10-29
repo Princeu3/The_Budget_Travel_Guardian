@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import type { TripDetails, PriceCheck } from '../../types/travel';
+import type { TripDetails, PriceCheck, FlightPreferences, HotelPreferences, CarRentalPreferences } from '../../types/travel';
 import { saveToSmartBucket } from '../../lib/raindrop.js';
 import { randomUUID } from 'crypto';
 
@@ -198,13 +198,45 @@ function extractBookingUrls(searchResult: any): string[] {
 }
 
 /**
+ * Build flight preferences query string
+ */
+function buildFlightPreferencesQuery(prefs?: FlightPreferences): string {
+  if (!prefs) return '';
+  
+  const parts: string[] = [];
+  
+  if (prefs.stops && prefs.stops !== 'any') {
+    parts.push(`${prefs.stops} flights only`);
+  }
+  
+  if (prefs.preferredAirlines && prefs.preferredAirlines.length > 0) {
+    parts.push(`Prefer airlines: ${prefs.preferredAirlines.join(', ')}`);
+  }
+  
+  if (prefs.extraLegroom) {
+    parts.push('with extra legroom seats');
+  }
+  
+  if (prefs.timeOfDay && prefs.timeOfDay !== 'any') {
+    parts.push(`${prefs.timeOfDay} departure time`);
+  }
+  
+  if (prefs.baggageCount) {
+    parts.push(`including ${prefs.baggageCount} checked bag(s)`);
+  }
+  
+  return parts.length > 0 ? `\nPreferences: ${parts.join(', ')}.` : '';
+}
+
+/**
  * Check flight prices using Perplexity API
  */
-async function checkFlightPrices(origin: string, destination: string, startDate: string): Promise<any> {
-  // Optimized query with specific instructions for better results
+async function checkFlightPrices(origin: string, destination: string, startDate: string, prefs?: FlightPreferences): Promise<any> {
+  // Optimized query with specific instructions and user preferences
+  const prefsQuery = buildFlightPreferencesQuery(prefs);
   const query = `Find the cheapest flight prices from ${origin} to ${destination} departing on ${startDate}. 
 Search only travel booking sites (Kayak, Expedia, Google Flights, Skyscanner).
-Provide specific dollar amounts, airline names, and direct booking links.
+Provide specific dollar amounts, airline names, and direct booking links.${prefsQuery}
 Format: "$XXX on [Airline] via [booking site URL]"`;
 
   console.log(`🔍 Searching flights: ${query}`);
@@ -257,13 +289,51 @@ Format: "$XXX on [Airline] via [booking site URL]"`;
 }
 
 /**
+ * Build hotel preferences query string
+ */
+function buildHotelPreferencesQuery(prefs?: HotelPreferences): string {
+  if (!prefs) return '';
+  
+  const parts: string[] = [];
+  
+  if (prefs.starRating) {
+    parts.push(`${prefs.starRating}-star rating or better`);
+  }
+  
+  if (prefs.roomType && prefs.roomType !== 'any') {
+    parts.push(`${prefs.roomType} room`);
+  }
+  
+  if (prefs.amenities && prefs.amenities.length > 0) {
+    const amenityList = prefs.amenities.map(a => {
+      const amenityMap: Record<string, string> = {
+        'wifi': 'free WiFi',
+        'breakfast': 'breakfast included',
+        'gym': 'fitness center',
+        'pool': 'swimming pool',
+        'parking': 'free parking'
+      };
+      return amenityMap[a] || a;
+    }).join(', ');
+    parts.push(`with ${amenityList}`);
+  }
+  
+  if (prefs.cancellationPolicy && prefs.cancellationPolicy !== 'any') {
+    parts.push(`${prefs.cancellationPolicy} cancellation policy`);
+  }
+  
+  return parts.length > 0 ? `\nPreferences: ${parts.join(', ')}.` : '';
+}
+
+/**
  * Check hotel prices using Perplexity API
  */
-async function checkHotelPrices(destination: string, startDate: string): Promise<any> {
-  // Optimized query for specific pricing and booking information
+async function checkHotelPrices(destination: string, startDate: string, prefs?: HotelPreferences): Promise<any> {
+  // Optimized query for specific pricing and booking information with preferences
+  const prefsQuery = buildHotelPreferencesQuery(prefs);
   const query = `Find the cheapest hotel rates per night in ${destination} for check-in date ${startDate}.
 Search only hotel booking sites (Booking.com, Hotels.com, Expedia, Kayak, Trivago).
-Provide specific nightly rates (price per night), hotel names, star ratings, and direct booking URLs.
+Provide specific nightly rates (price per night), hotel names, star ratings, and direct booking URLs.${prefsQuery}
 Format: "$XXX/night at [Hotel Name] ([X] stars) - [booking URL]"`;
 
   console.log(`🔍 Searching hotels: ${query}`);
@@ -316,13 +386,49 @@ Format: "$XXX/night at [Hotel Name] ([X] stars) - [booking URL]"`;
 }
 
 /**
+ * Build car rental preferences query string
+ */
+function buildCarRentalPreferencesQuery(prefs?: CarRentalPreferences): string {
+  if (!prefs) return '';
+  
+  const parts: string[] = [];
+  
+  if (prefs.vehicleType && prefs.vehicleType !== 'any') {
+    parts.push(`${prefs.vehicleType} vehicle`);
+  }
+  
+  if (prefs.transmission && prefs.transmission !== 'any') {
+    parts.push(`${prefs.transmission} transmission`);
+  }
+  
+  if (prefs.mileage) {
+    parts.push(`${prefs.mileage} mileage`);
+  }
+  
+  if (prefs.features && prefs.features.length > 0) {
+    const featureMap: Record<string, string> = {
+      'gps': 'GPS navigation',
+      'bluetooth': 'Bluetooth',
+      'backup-camera': 'backup camera',
+      'usb': 'USB ports',
+      'carplay': 'Apple CarPlay'
+    };
+    const featureList = prefs.features.map(f => featureMap[f] || f).join(', ');
+    parts.push(`with ${featureList}`);
+  }
+  
+  return parts.length > 0 ? `\nPreferences: ${parts.join(', ')}.` : '';
+}
+
+/**
  * Check car rental prices using Perplexity API
  */
-async function checkCarPrices(destination: string, startDate: string): Promise<any> {
-  // Optimized query for car rental pricing with specific requirements
+async function checkCarPrices(destination: string, startDate: string, prefs?: CarRentalPreferences): Promise<any> {
+  // Optimized query for car rental pricing with specific requirements and preferences
+  const prefsQuery = buildCarRentalPreferencesQuery(prefs);
   const query = `Find the cheapest car rental rates per day in ${destination} for pickup date ${startDate}.
 Search only car rental booking sites (Enterprise, Hertz, Avis, Budget, Kayak, Expedia).
-Provide specific daily rates (price per day), rental company names, car types (economy, compact, etc.), and direct booking URLs.
+Provide specific daily rates (price per day), rental company names, car types (economy, compact, etc.), and direct booking URLs.${prefsQuery}
 Format: "$XX/day for [Car Type] from [Company] - [booking URL]"`;
 
   console.log(`🔍 Searching car rentals: ${query}`);
@@ -385,11 +491,11 @@ async function checkAllPrices(tripDetails: TripDetails): Promise<PriceCheck> {
 
   console.log(`\n🎯 Checking prices for ${days}-day trip from ${tripDetails.origin} to ${tripDetails.destination}`);
 
-  // Check all prices in parallel for speed
+  // Check all prices in parallel for speed, passing user preferences
   const [flightData, hotelData, carData] = await Promise.all([
-    checkFlightPrices(tripDetails.origin, tripDetails.destination, tripDetails.startDate),
-    checkHotelPrices(tripDetails.destination, tripDetails.startDate),
-    checkCarPrices(tripDetails.destination, tripDetails.startDate),
+    checkFlightPrices(tripDetails.origin, tripDetails.destination, tripDetails.startDate, tripDetails.flightPreferences),
+    checkHotelPrices(tripDetails.destination, tripDetails.startDate, tripDetails.hotelPreferences),
+    checkCarPrices(tripDetails.destination, tripDetails.startDate, tripDetails.carRentalPreferences),
   ]);
 
   // Calculate totals
