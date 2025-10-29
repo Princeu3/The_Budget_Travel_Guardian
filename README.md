@@ -1,4 +1,4 @@
-# 🛡️ The Travel Guardian
+# 🛡️ The Budget Travel Guardian
 
 **Your guardian hunts while you sleep** - An autonomous AI-powered travel price monitoring system that tracks flights, hotels, and car rentals 24/7 and alerts you when prices match your budget.
 
