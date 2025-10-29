@@ -6,8 +6,8 @@
  *
  * Environment Variables Required:
  * - LIQUIDMETAL_API_KEY: Your Raindrop API key
- * - RAINDROP_SMARTMEMORY_NAME: SmartMemory instance name (optional, defaults to 'travel-agent-memory')
- * - RAINDROP_APPLICATION_NAME: Application identifier (optional, defaults to 'travel-deal-hunter')
+ * - RAINDROP_SMARTMEMORY_NAME: SmartMemory instance name (optional, defaults to 'travel-guardian-memory')
+ * - RAINDROP_APPLICATION_NAME: Application identifier (optional, defaults to 'travel-guardian')
  * - RAINDROP_APPLICATION_VERSION: Version string (optional, defaults to '1.0.0')
  */
 
@@ -74,7 +74,7 @@ export function getSmartBucketLocation(bucketName) {
 
 /**
  * Save data to SmartMemory
- * Stores key-value pairs in the agent's memory system
+ * Stores key-value pairs in the guardian's memory system
  *
  * @param {string} sessionId - Active session ID
  * @param {string} key - Memory key identifier

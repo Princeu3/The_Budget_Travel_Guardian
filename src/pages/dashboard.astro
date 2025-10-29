@@ -1,5 +1,5 @@
 ---
-// Living Agent Dashboard - Night of the Living Agents
+// The Travel Guardian Dashboard
 import '../styles/globals.css';
 ---
 
@@ -8,7 +8,9 @@ import '../styles/globals.css';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👁️ Agent Dashboard - HUNTING</title>
+    <title>🛡️ The Travel Guardian - HUNTING</title>
+    <link rel="icon" type="image/x-icon" href="/travel-guardian-logo.ico" />
+    <link rel="icon" type="image/png" href="/travel-guardian-logo.png" />
     <style>
         @keyframes pulse-glow {
             0%, 100% {
@@ -122,12 +124,15 @@ import '../styles/globals.css';
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 class="text-4xl md:text-5xl font-bold mb-2">
-                            <span class="glow-green">👁️ NIGHT OF THE LIVING AGENTS</span>
-                        </h1>
+                        <div class="flex items-center mb-4">
+                            <img src="/travel-guardian-logo.png" alt="Travel Guardian Logo" class="w-16 h-16 mr-4" />
+                            <h1 class="text-4xl md:text-5xl font-bold">
+                                <span class="glow-green">THE TRAVEL GUARDIAN</span>
+                            </h1>
+                        </div>
                         <div id="agent-status" class="text-2xl font-bold status-active">
-                            <span class="pulse-eye">👁️</span>
-                            <span class="glow-green">Agent Status: HUNTING</span>
+                            <img src="/travel-guardian-logo.png" alt="Guardian" class="w-6 h-6 inline mr-2 pulse-eye" />
+                            <span class="glow-green">Guardian Status: HUNTING</span>
                         </div>
                     </div>
 
@@ -232,13 +237,14 @@ import '../styles/globals.css';
             <!-- SECTION 4: AGENT ACTIVITY LOG -->
             <div>
                 <h2 class="text-2xl font-bold glow-purple mb-4">
-                    📋 AGENT ACTIVITY LOG
+                    📋 GUARDIAN ACTIVITY LOG
                 </h2>
                 <div class="card-glow rounded-lg p-6 relative overflow-hidden">
                     <div class="scanner-line"></div>
                     <div id="activity-log" class="space-y-2">
                         <div class="activity-item text-sm">
-                            <span class="glow-green">🤖</span> Agent initialized...
+                            <img src="/travel-guardian-logo.png" alt="Guardian" class="w-4 h-4 inline mr-2" />
+                            <span class="glow-green">Guardian initialized...</span>
                         </div>
                     </div>
                 </div>
@@ -281,7 +287,7 @@ import '../styles/globals.css';
         function addActivity(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const icons = {
-                info: '🤖',
+                info: '<img src="/travel-guardian-logo.png" alt="Guardian" class="w-4 h-4 inline mr-1" />',
                 success: '✅',
                 warning: '⚠️',
                 error: '❌',

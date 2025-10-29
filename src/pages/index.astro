@@ -1,5 +1,5 @@
 ---
-// Night of the Living Agents - Halloween Travel Deal Hunter
+// The Travel Guardian - Intelligent Travel Deal Hunter
 import '../styles/globals.css';
 ---
 
@@ -8,7 +8,9 @@ import '../styles/globals.css';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Night of the Living Agents 🎃</title>
+    <title>The Travel Guardian 🛡️</title>
+    <link rel="icon" type="image/x-icon" href="/travel-guardian-logo.ico" />
+    <link rel="icon" type="image/png" href="/travel-guardian-logo.png" />
     <style>
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41; }
@@ -36,15 +38,17 @@ import '../styles/globals.css';
     <div class="container mx-auto px-4 py-8 md:py-16">
         <!-- Header -->
         <div class="text-center mb-12 md:mb-16">
-            <div class="text-6xl md:text-8xl mb-4 animate-flicker">🎃</div>
+            <div class="mb-4 animate-flicker">
+                <img src="/travel-guardian-logo.png" alt="Travel Guardian Logo" class="w-24 h-24 md:w-32 md:h-32 mx-auto" />
+            </div>
             <h1 class="text-4xl md:text-6xl font-bold mb-4 glow-text" style="color: #00ff41;">
-                NIGHT OF THE LIVING AGENTS
+                THE TRAVEL GUARDIAN
             </h1>
             <p class="text-xl md:text-2xl mb-2 purple-glow font-semibold" style="color: #8b00ff;">
-                Your agent hunts while you sleep 🤖
+                Your guardian hunts while you sleep 🛡️
             </p>
             <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto">
-                Deploy an autonomous travel deal hunter that monitors prices 24/7,
+                Deploy an autonomous travel guardian that monitors prices 24/7,
                 stalking the web for the best flight, hotel, and car rental deals
             </p>
         </div>
@@ -53,13 +57,13 @@ import '../styles/globals.css';
         <div class="max-w-3xl mx-auto rounded-lg overflow-hidden" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); border: 2px solid #00ff41;">
             <div class="p-8 md:p-10">
                 <div class="flex items-center justify-center mb-8">
-                    <div class="text-4xl mr-3">👻</div>
+                    <img src="/travel-guardian-logo.png" alt="Travel Guardian Logo" class="w-12 h-12 mr-3" />
                     <h2 class="text-2xl md:text-3xl font-bold" style="color: #ffffff;">
-                        Activate Your Agent
+                        Activate Your Guardian
                     </h2>
                 </div>
 
-                <form id="agentForm" class="space-y-6">
+                <form id="guardianForm" class="space-y-6">
                     <!-- Trip Details -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -233,12 +237,12 @@ import '../styles/globals.css';
 
         <!-- Footer -->
         <div class="text-center mt-12 text-sm text-gray-500">
-            <p>Built for Night of the Living Agents Hackathon 2024 👻</p>
+            <p>Built for The Travel Guardian Platform 2024 🛡️</p>
         </div>
     </div>
 
     <script>
-        document.getElementById('agentForm')?.addEventListener('submit', async (e) => {
+        document.getElementById('guardianForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const formData = new FormData(e.target as HTMLFormElement);
