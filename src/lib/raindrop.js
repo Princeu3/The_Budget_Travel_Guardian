@@ -46,14 +46,11 @@ export function getSmartMemoryLocation() {
     return {
         smartMemory: {
             name: import.meta.env.RAINDROP_SMARTMEMORY_NAME ||
-                  process.env.RAINDROP_SMARTMEMORY_NAME ||
-                  'travel-agent-memory',
+                  process.env.RAINDROP_SMARTMEMORY_NAME,
             application_name: import.meta.env.RAINDROP_APPLICATION_NAME ||
-                             process.env.RAINDROP_APPLICATION_NAME ||
-                             'travel-deal-hunter',
+                             process.env.RAINDROP_APPLICATION_NAME,
             version: import.meta.env.RAINDROP_APPLICATION_VERSION ||
-                    process.env.RAINDROP_APPLICATION_VERSION ||
-                    '1.0.0'
+                    process.env.RAINDROP_APPLICATION_VERSION
         }
     };
 }

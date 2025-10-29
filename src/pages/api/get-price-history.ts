@@ -24,8 +24,24 @@ export const GET: APIRoute = async ({ url, request }) => {
 
     // Get bucket name from environment
     const bucketName = process.env.RAINDROP_SMARTBUCKET_NAME ||
-                       import.meta.env.RAINDROP_SMARTBUCKET_NAME ||
-                       'BudgetTravelGuardian-sb';
+                       import.meta.env.RAINDROP_SMARTBUCKET_NAME;
+
+    if (!bucketName) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          userId,
+          count: 0,
+          history: [],
+          error: 'RAINDROP_SMARTBUCKET_NAME environment variable not set',
+          details: 'Raindrop integration not configured',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     try {
       const client = getRaindropClient();

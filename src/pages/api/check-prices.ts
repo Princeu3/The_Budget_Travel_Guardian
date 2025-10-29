@@ -401,7 +401,12 @@ export const POST: APIRoute = async ({ request }) => {
       console.log('🔍 Attempting Raindrop integration...');
 
       // 1. Save trip configuration to SmartBuckets
-      const bucketName = process.env.RAINDROP_SMARTBUCKET_NAME || import.meta.env.RAINDROP_SMARTBUCKET_NAME || 'BudgetTravelGuardian-sb';
+      const bucketName = process.env.RAINDROP_SMARTBUCKET_NAME || import.meta.env.RAINDROP_SMARTBUCKET_NAME;
+      
+      if (!bucketName) {
+        throw new Error('RAINDROP_SMARTBUCKET_NAME environment variable not set');
+      }
+      
       const configKey = `trip-${userId}-${timestamp}`;
 
       const tripConfig = {
@@ -443,7 +448,12 @@ export const POST: APIRoute = async ({ request }) => {
     // Save price check to SmartBuckets if Raindrop is available
     if (sessionId && !raindropError) {
       try {
-        const priceHistoryBucket = process.env.RAINDROP_SMARTBUCKET_NAME || import.meta.env.RAINDROP_SMARTBUCKET_NAME || 'BudgetTravelGuardian-sb';
+        const priceHistoryBucket = process.env.RAINDROP_SMARTBUCKET_NAME || import.meta.env.RAINDROP_SMARTBUCKET_NAME;
+        
+        if (!priceHistoryBucket) {
+          throw new Error('RAINDROP_SMARTBUCKET_NAME environment variable not set');
+        }
+        
         const priceKey = `price-${userId}-${timestamp}`;
 
         await saveToSmartBucket(priceHistoryBucket, priceKey, {
