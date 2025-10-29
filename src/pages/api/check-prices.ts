@@ -1,5 +1,33 @@
 import type { APIRoute } from 'astro';
 import type { TripDetails, PriceCheck } from '../../types/travel';
+import {
+  saveToSmartBucket,
+} from '../../lib/raindrop.js';
+import { randomUUID } from 'crypto';
+
+/**
+ * Generate a simple user ID (UUID v4)
+ * In a real app, this would come from authentication
+ */
+function generateUserId(): string {
+  return randomUUID();
+}
+
+/**
+ * Get or create user ID from request headers/cookies
+ * For this demo, we'll use a header or generate a new one
+ */
+function getUserId(request: Request): string {
+  // Check for existing user ID in header
+  const existingUserId = request.headers.get('x-user-id');
+
+  if (existingUserId) {
+    return existingUserId;
+  }
+
+  // Generate new user ID
+  return generateUserId();
+}
 
 // Mock data for demo purposes - simulates API calls to flight/hotel/car services
 function generateMockPrices(tripDetails: TripDetails): PriceCheck {
@@ -63,6 +91,55 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    // Get or generate user ID
+    const userId = getUserId(request);
+    const timestamp = Date.now();
+
+    // Initialize Raindrop integration
+    let raindropError: Error | null = null;
+    let sessionId: string | null = `session-${userId}-${timestamp}`;
+
+    try {
+      console.log('🔍 Attempting Raindrop integration...');
+
+      // 1. Save trip configuration to SmartBuckets
+      // Use the bucket name from environment variables (provisioned by Netlify)
+      const bucketName = process.env.RAINDROP_SMARTBUCKET_NAME || import.meta.env.RAINDROP_SMARTBUCKET_NAME || 'BudgetTravelGuardian-sb';
+      const configKey = `trip-${userId}-${timestamp}`;
+
+      const tripConfig = {
+        ...tripDetails,
+        userId,
+        timestamp: new Date(timestamp).toISOString(),
+        sessionId,
+      };
+
+      await saveToSmartBucket(bucketName, configKey, tripConfig);
+      console.log(`✅ Saved trip config to SmartBucket: ${bucketName}/${configKey}`);
+
+      // 2. Save user preferences to SmartBucket (instead of SmartMemory)
+      const preferencesKey = `preferences-${userId}`;
+      const budgetPreferences = {
+        totalBudget: tripDetails.totalBudget,
+        flightBudget: tripDetails.flightBudget,
+        hotelBudgetPerNight: tripDetails.hotelBudgetPerNight,
+        carBudgetPerDay: tripDetails.carBudgetPerDay,
+        lastUpdated: new Date(timestamp).toISOString(),
+      };
+
+      await saveToSmartBucket(bucketName, preferencesKey, budgetPreferences);
+      console.log(`✅ Saved user preferences to SmartBucket: ${bucketName}/${preferencesKey}`);
+
+    } catch (raindropErr) {
+      // Log Raindrop errors but don't fail the request
+      raindropError = raindropErr as Error;
+      console.error('❌ Raindrop integration error:', raindropErr);
+      if (raindropErr instanceof Error) {
+        console.error('Error message:', raindropErr.message);
+      }
+      // Continue with price checking even if Raindrop fails
+    }
+
     // Generate mock price data
     // In a real app, you would call actual APIs here:
     // - Flight: Amadeus, Skyscanner, Kayak API
@@ -70,14 +147,53 @@ export const POST: APIRoute = async ({ request }) => {
     // - Car: Rentalcars.com, Kayak API
     const priceCheck = generateMockPrices(tripDetails);
 
+    // Save price check to SmartBuckets if Raindrop is available
+    if (sessionId && !raindropError) {
+      try {
+        // Using same bucket for price history
+        const priceHistoryBucket = process.env.RAINDROP_SMARTBUCKET_NAME || import.meta.env.RAINDROP_SMARTBUCKET_NAME || 'BudgetTravelGuardian-sb';
+        const priceKey = `price-${userId}-${timestamp}`;
+
+        await saveToSmartBucket(priceHistoryBucket, priceKey, {
+          ...priceCheck,
+          tripDetails: {
+            origin: tripDetails.origin,
+            destination: tripDetails.destination,
+            startDate: tripDetails.startDate,
+            endDate: tripDetails.endDate,
+          },
+        });
+        console.log(`✅ Saved price check to SmartBucket: ${priceHistoryBucket}/${priceKey}`);
+      } catch (err) {
+        console.error('❌ Error saving price history:', err);
+      }
+    }
+
+    // Return response with userId and sessionId
+    const response = {
+      ...priceCheck,
+      userId,
+      sessionId,
+      raindropEnabled: !raindropError,
+    };
+
     return new Response(
-      JSON.stringify(priceCheck),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify(response),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': userId, // Return userId in header for client to store
+        }
+      }
     );
   } catch (error) {
     console.error('Error checking prices:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to check prices' }),
+      JSON.stringify({
+        error: 'Failed to check prices',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

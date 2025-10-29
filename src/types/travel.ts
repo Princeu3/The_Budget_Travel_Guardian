@@ -28,4 +28,7 @@ export interface PriceCheck {
   totalCost: number;
   withinTotalBudget: boolean;
   timestamp: string;
+  userId?: string;
+  sessionId?: string;
+  raindropEnabled?: boolean;
 }

@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Dashboard 🤖</title>
+    <link rel="stylesheet" href="/src/styles/globals.css">
     <style>
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41; }
@@ -270,17 +271,45 @@
             updateStatus('Scanning markets...', 'checking');
 
             try {
+                // Get stored userId from localStorage
+                const storedUserId = localStorage.getItem('userId');
+
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json',
+                };
+
+                // Include userId in header if available
+                if (storedUserId) {
+                    headers['x-user-id'] = storedUserId;
+                }
+
                 const response = await fetch('/api/check-prices', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers,
                     body: JSON.stringify(tripDetails),
                 });
 
                 if (!response.ok) throw new Error('Failed to check prices');
 
                 const priceCheck: PriceCheck = await response.json();
+
+                // Store userId and sessionId if returned
+                if (priceCheck.userId) {
+                    localStorage.setItem('userId', priceCheck.userId);
+                }
+                if (priceCheck.sessionId) {
+                    localStorage.setItem('sessionId', priceCheck.sessionId);
+                }
+
+                // Log Raindrop status
+                if (priceCheck.raindropEnabled) {
+                    console.log('✅ Raindrop integration active');
+                    console.log('User ID:', priceCheck.userId);
+                    console.log('Session ID:', priceCheck.sessionId);
+                } else {
+                    console.log('⚠️ Raindrop integration unavailable');
+                }
+
                 updatePriceDisplay(priceCheck);
                 addToPriceHistory(priceCheck);
                 updateStatus('Active • Hunting for deals', 'active');
