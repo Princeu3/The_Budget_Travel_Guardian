@@ -514,7 +514,7 @@ import '../styles/globals.css';
 
         // Countdown timer
         function startCountdown() {
-            state.countdown = 7200; // 2 hours = 7200 seconds
+            state.countdown = 5; // 5 seconds for testing
 
             const countdownInterval = setInterval(() => {
                 state.countdown--;
@@ -539,7 +539,7 @@ import '../styles/globals.css';
             // Start auto-refresh countdown
             startCountdown();
 
-            addActivity('Auto-refresh enabled (2hr interval)', 'info');
+            addActivity('Auto-refresh enabled (5s interval)', 'info');
         }
 
         // Start the dashboard
