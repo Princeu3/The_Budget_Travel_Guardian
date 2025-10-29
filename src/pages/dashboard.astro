@@ -1,0 +1,434 @@
+---
+// Dashboard page for real-time price monitoring - Halloween Theme
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard 🤖</title>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41; }
+            50% { box-shadow: 0 0 30px #00ff41, 0 0 60px #00ff41; }
+        }
+        @keyframes scanner {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .glow-green {
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        .glow-purple {
+            color: #8b00ff;
+            text-shadow: 0 0 10px #8b00ff;
+        }
+        .glow-red {
+            color: #ff0040;
+            text-shadow: 0 0 10px #ff0040;
+        }
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff41, transparent);
+            animation: scanner 2s linear infinite;
+        }
+        .card-glow {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen" style="background-color: #0a0a0a; color: #ffffff;">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold glow-green mb-2">🤖 AGENT DASHBOARD</h1>
+                <p class="text-gray-400">Your autonomous hunter is active</p>
+            </div>
+            <a
+                href="/"
+                class="px-6 py-2 rounded-lg font-semibold transition hover:scale-105"
+                style="background-color: #1a1a1a; border: 1px solid #00ff41; color: #00ff41;"
+            >
+                ← Deploy New Agent
+            </a>
+        </div>
+
+        <!-- Trip Details Card -->
+        <div class="rounded-lg p-6 mb-6 relative overflow-hidden" style="background-color: #1a1a1a; border: 2px solid #333333;">
+            <div class="scanner-line"></div>
+            <h2 class="text-xl font-bold mb-4 glow-purple">📍 Mission Parameters</h2>
+            <div id="tripInfo" class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Status Card -->
+        <div class="rounded-lg p-6 mb-6" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); border: 2px solid #00ff41;">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div id="statusIndicator" class="w-3 h-3 rounded-full bg-green-400" style="box-shadow: 0 0 10px #00ff41;"></div>
+                        <h2 class="text-xl font-bold glow-green">AGENT STATUS</h2>
+                    </div>
+                    <p id="statusText" class="text-gray-400">Initializing hunter protocol...</p>
+                </div>
+                <div class="text-sm text-gray-400 space-y-1">
+                    <p id="lastCheck">Last scan: Never</p>
+                    <p id="nextCheck" class="glow-green font-semibold">Next scan: 30s</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Flight Card -->
+            <div class="rounded-lg p-6 relative overflow-hidden" style="background-color: #1a1a1a; border: 2px solid #333333;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="text-2xl">✈️</span>
+                        <span style="color: #ffffff;">Flight</span>
+                    </h3>
+                    <span id="flightBadge" class="px-3 py-1 text-xs font-bold rounded-full" style="background-color: #333333; color: #999999;">
+                        SCANNING...
+                    </span>
+                </div>
+                <div id="flightPrice" class="text-4xl font-bold mb-2 glow-green">--</div>
+                <div id="flightCarrier" class="text-sm text-gray-400 mb-3">Carrier: Searching...</div>
+                <div class="text-xs text-gray-500">
+                    Target: $<span id="flightBudgetDisplay"></span>
+                </div>
+            </div>
+
+            <!-- Hotel Card -->
+            <div class="rounded-lg p-6 relative overflow-hidden" style="background-color: #1a1a1a; border: 2px solid #333333;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="text-2xl">🏨</span>
+                        <span style="color: #ffffff;">Hotel</span>
+                    </h3>
+                    <span id="hotelBadge" class="px-3 py-1 text-xs font-bold rounded-full" style="background-color: #333333; color: #999999;">
+                        SCANNING...
+                    </span>
+                </div>
+                <div id="hotelPrice" class="text-4xl font-bold mb-2 glow-green">--</div>
+                <div id="hotelName" class="text-sm text-gray-400 mb-3">Property: Searching...</div>
+                <div class="text-xs text-gray-500">
+                    Target per night: $<span id="hotelBudgetDisplay"></span>
+                </div>
+            </div>
+
+            <!-- Car Card -->
+            <div class="rounded-lg p-6 relative overflow-hidden" style="background-color: #1a1a1a; border: 2px solid #333333;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="text-2xl">🚗</span>
+                        <span style="color: #ffffff;">Car Rental</span>
+                    </h3>
+                    <span id="carBadge" class="px-3 py-1 text-xs font-bold rounded-full" style="background-color: #333333; color: #999999;">
+                        SCANNING...
+                    </span>
+                </div>
+                <div id="carPrice" class="text-4xl font-bold mb-2 glow-green">--</div>
+                <div id="carType" class="text-sm text-gray-400 mb-3">Type: Searching...</div>
+                <div class="text-xs text-gray-500">
+                    Target per day: $<span id="carBudgetDisplay"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Cost Card -->
+        <div class="rounded-lg p-6 mb-6" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); border: 2px solid #8b00ff;">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold mb-3 glow-purple">💰 Total Mission Cost</h2>
+                    <div id="totalCost" class="text-5xl font-bold glow-green">--</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-400 mb-2">Budget Threshold</div>
+                    <div id="totalBudgetDisplay" class="text-3xl font-bold glow-purple">--</div>
+                </div>
+            </div>
+            <div class="mt-6">
+                <div class="h-3 rounded-full overflow-hidden" style="background-color: #0a0a0a;">
+                    <div id="budgetProgress" class="h-full transition-all duration-500" style="width: 0%; background-color: #00ff41;"></div>
+                </div>
+                <p id="budgetStatus" class="text-sm text-gray-400 mt-3">Awaiting price data...</p>
+            </div>
+        </div>
+
+        <!-- Price History -->
+        <div class="rounded-lg p-6" style="background-color: #1a1a1a; border: 2px solid #333333;">
+            <h2 class="text-xl font-bold mb-4 glow-green">📊 SURVEILLANCE LOG</h2>
+            <div id="priceHistory" class="space-y-3 max-h-96 overflow-y-auto">
+                <div class="text-center py-8 text-gray-500">
+                    <div class="text-4xl mb-2">👁️</div>
+                    <p>No scans yet. Agent will begin hunting shortly...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        interface TripDetails {
+            origin: string;
+            destination: string;
+            startDate: string;
+            endDate: string;
+            totalBudget: number;
+            flightBudget: number;
+            hotelBudgetPerNight: number;
+            carBudgetPerDay: number;
+        }
+
+        interface PriceCheck {
+            flight: {
+                price: number;
+                carrier: string;
+                withinBudget: boolean;
+            };
+            hotel: {
+                pricePerNight: number;
+                name: string;
+                withinBudget: boolean;
+            };
+            car: {
+                pricePerDay: number;
+                type: string;
+                withinBudget: boolean;
+            };
+            totalCost: number;
+            withinTotalBudget: boolean;
+            timestamp: string;
+        }
+
+        let tripDetails: TripDetails | null = null;
+        let monitoringInterval: number | null = null;
+        let priceHistory: PriceCheck[] = [];
+        let nextCheckTimer: number | null = null;
+        let secondsUntilNextCheck = 30;
+
+        // Load trip details from localStorage
+        function loadTripDetails() {
+            const stored = localStorage.getItem('tripDetails');
+            if (!stored) {
+                window.location.href = '/';
+                return;
+            }
+
+            tripDetails = JSON.parse(stored);
+            displayTripDetails();
+            startMonitoring();
+        }
+
+        function displayTripDetails() {
+            if (!tripDetails) return;
+
+            const tripInfo = document.getElementById('tripInfo');
+            if (tripInfo) {
+                tripInfo.innerHTML = `
+                    <div>
+                        <div class="text-gray-500 text-xs uppercase">Route</div>
+                        <div class="font-bold text-white mt-1">${tripDetails.origin} → ${tripDetails.destination}</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-500 text-xs uppercase">Departure</div>
+                        <div class="font-bold text-white mt-1">${new Date(tripDetails.startDate).toLocaleDateString()}</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-500 text-xs uppercase">Return</div>
+                        <div class="font-bold text-white mt-1">${new Date(tripDetails.endDate).toLocaleDateString()}</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-500 text-xs uppercase">Duration</div>
+                        <div class="font-bold text-white mt-1">${calculateDays()} days</div>
+                    </div>
+                `;
+            }
+
+            // Update budget displays
+            document.getElementById('flightBudgetDisplay')!.textContent = tripDetails.flightBudget.toString();
+            document.getElementById('hotelBudgetDisplay')!.textContent = tripDetails.hotelBudgetPerNight.toString();
+            document.getElementById('carBudgetDisplay')!.textContent = tripDetails.carBudgetPerDay.toString();
+            document.getElementById('totalBudgetDisplay')!.textContent = `$${tripDetails.totalBudget.toLocaleString()}`;
+        }
+
+        function calculateDays(): number {
+            if (!tripDetails) return 0;
+            const start = new Date(tripDetails.startDate);
+            const end = new Date(tripDetails.endDate);
+            return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        async function checkPrices() {
+            if (!tripDetails) return;
+
+            updateStatus('Scanning markets...', 'checking');
+
+            try {
+                const response = await fetch('/api/check-prices', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(tripDetails),
+                });
+
+                if (!response.ok) throw new Error('Failed to check prices');
+
+                const priceCheck: PriceCheck = await response.json();
+                updatePriceDisplay(priceCheck);
+                addToPriceHistory(priceCheck);
+                updateStatus('Active • Hunting for deals', 'active');
+
+                const lastCheckEl = document.getElementById('lastCheck');
+                if (lastCheckEl) {
+                    lastCheckEl.textContent = `Last scan: ${new Date().toLocaleTimeString()}`;
+                }
+            } catch (error) {
+                console.error('Error checking prices:', error);
+                updateStatus('Error • Retrying scan', 'error');
+            }
+        }
+
+        function updatePriceDisplay(priceCheck: PriceCheck) {
+            // Update flight
+            document.getElementById('flightPrice')!.textContent = `$${priceCheck.flight.price}`;
+            document.getElementById('flightCarrier')!.textContent = `Carrier: ${priceCheck.flight.carrier}`;
+            updateBadge('flightBadge', priceCheck.flight.withinBudget);
+
+            // Update hotel
+            document.getElementById('hotelPrice')!.textContent = `$${priceCheck.hotel.pricePerNight}/nt`;
+            document.getElementById('hotelName')!.textContent = `Property: ${priceCheck.hotel.name}`;
+            updateBadge('hotelBadge', priceCheck.hotel.withinBudget);
+
+            // Update car
+            document.getElementById('carPrice')!.textContent = `$${priceCheck.car.pricePerDay}/day`;
+            document.getElementById('carType')!.textContent = `Type: ${priceCheck.car.type}`;
+            updateBadge('carBadge', priceCheck.car.withinBudget);
+
+            // Update total
+            document.getElementById('totalCost')!.textContent = `$${priceCheck.totalCost.toLocaleString()}`;
+
+            const percentage = (priceCheck.totalCost / tripDetails!.totalBudget) * 100;
+            const progressBar = document.getElementById('budgetProgress');
+            if (progressBar) {
+                progressBar.style.width = `${Math.min(percentage, 100)}%`;
+                progressBar.style.backgroundColor = priceCheck.withinTotalBudget ? '#00ff41' : '#ff0040';
+            }
+
+            const budgetStatus = document.getElementById('budgetStatus');
+            if (budgetStatus) {
+                if (priceCheck.withinTotalBudget) {
+                    const savings = tripDetails!.totalBudget - priceCheck.totalCost;
+                    budgetStatus.innerHTML = `<span class="glow-green font-bold">✅ DEAL FOUND!</span> Save $${savings.toLocaleString()}`;
+                } else {
+                    const overage = priceCheck.totalCost - tripDetails!.totalBudget;
+                    budgetStatus.innerHTML = `<span class="glow-red font-bold">❌ OVER BUDGET</span> by $${overage.toLocaleString()}`;
+                }
+            }
+        }
+
+        function updateBadge(elementId: string, withinBudget: boolean) {
+            const badge = document.getElementById(elementId);
+            if (badge) {
+                if (withinBudget) {
+                    badge.textContent = '✓ TARGET';
+                    badge.style.backgroundColor = '#00ff41';
+                    badge.style.color = '#0a0a0a';
+                } else {
+                    badge.textContent = '⚠ OVER';
+                    badge.style.backgroundColor = '#ff0040';
+                    badge.style.color = '#ffffff';
+                }
+            }
+        }
+
+        function updateStatus(text: string, status: 'checking' | 'active' | 'error') {
+            const statusText = document.getElementById('statusText');
+            const statusIndicator = document.getElementById('statusIndicator');
+
+            if (statusText) statusText.textContent = text;
+
+            if (statusIndicator) {
+                const colors: Record<string, string> = {
+                    checking: '#ffff00',
+                    active: '#00ff41',
+                    error: '#ff0040'
+                };
+                statusIndicator.style.backgroundColor = colors[status];
+                statusIndicator.style.boxShadow = `0 0 10px ${colors[status]}`;
+            }
+        }
+
+        function addToPriceHistory(priceCheck: PriceCheck) {
+            priceHistory.unshift(priceCheck);
+            if (priceHistory.length > 50) priceHistory.pop();
+
+            const historyEl = document.getElementById('priceHistory');
+            if (!historyEl) return;
+
+            historyEl.innerHTML = priceHistory.map((check) => {
+                const time = new Date(check.timestamp).toLocaleTimeString();
+                const isGoodDeal = check.withinTotalBudget;
+
+                return `
+                    <div class="p-4 rounded-lg" style="background-color: ${isGoodDeal ? '#001a0a' : '#1a0000'}; border: 1px solid ${isGoodDeal ? '#00ff41' : '#ff0040'};">
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="text-xs text-gray-500 mb-2">${time}</div>
+                                <div class="text-sm space-x-4">
+                                    <span>✈️ $${check.flight.price}</span>
+                                    <span>🏨 $${check.hotel.pricePerNight}/nt</span>
+                                    <span>🚗 $${check.car.pricePerDay}/day</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold ${isGoodDeal ? 'glow-green' : 'glow-red'}">
+                                    $${check.totalCost.toLocaleString()}
+                                </div>
+                                ${isGoodDeal ? '<div class="text-xs font-bold glow-green">DEAL FOUND!</div>' : '<div class="text-xs font-bold glow-red">OVER BUDGET</div>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function startMonitoring() {
+            // Initial check
+            checkPrices();
+
+            // Start countdown timer
+            secondsUntilNextCheck = 30;
+            nextCheckTimer = window.setInterval(() => {
+                secondsUntilNextCheck--;
+                const nextCheckEl = document.getElementById('nextCheck');
+                if (nextCheckEl) {
+                    nextCheckEl.textContent = `Next scan: ${secondsUntilNextCheck}s`;
+                }
+
+                if (secondsUntilNextCheck <= 0) {
+                    secondsUntilNextCheck = 30;
+                }
+            }, 1000);
+
+            // Check prices every 30 seconds
+            monitoringInterval = window.setInterval(checkPrices, 30000);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (monitoringInterval) clearInterval(monitoringInterval);
+            if (nextCheckTimer) clearInterval(nextCheckTimer);
+        });
+
+        // Initialize
+        loadTripDetails();
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+---
+// Night of the Living Agents - Halloween Travel Deal Hunter
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night of the Living Agents 🎃</title>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41; }
+            50% { box-shadow: 0 0 30px #00ff41, 0 0 60px #00ff41; }
+        }
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .glow-text {
+            text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+        }
+        .purple-glow {
+            text-shadow: 0 0 10px #8b00ff, 0 0 20px #8b00ff;
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .animate-flicker {
+            animation: flicker 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen" style="background-color: #0a0a0a;">
+    <div class="container mx-auto px-4 py-8 md:py-16">
+        <!-- Header -->
+        <div class="text-center mb-12 md:mb-16">
+            <div class="text-6xl md:text-8xl mb-4 animate-flicker">🎃</div>
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 glow-text" style="color: #00ff41;">
+                NIGHT OF THE LIVING AGENTS
+            </h1>
+            <p class="text-xl md:text-2xl mb-2 purple-glow font-semibold" style="color: #8b00ff;">
+                Your agent hunts while you sleep 🤖
+            </p>
+            <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto">
+                Deploy an autonomous travel deal hunter that monitors prices 24/7,
+                stalking the web for the best flight, hotel, and car rental deals
+            </p>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="max-w-3xl mx-auto rounded-lg overflow-hidden" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); border: 2px solid #00ff41;">
+            <div class="p-8 md:p-10">
+                <div class="flex items-center justify-center mb-8">
+                    <div class="text-4xl mr-3">👻</div>
+                    <h2 class="text-2xl md:text-3xl font-bold" style="color: #ffffff;">
+                        Activate Your Agent
+                    </h2>
+                </div>
+
+                <form id="agentForm" class="space-y-6">
+                    <!-- Trip Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="origin" class="block text-sm font-semibold mb-2" style="color: #00ff41;">
+                                🛫 Origin City
+                            </label>
+                            <input
+                                type="text"
+                                id="origin"
+                                name="origin"
+                                required
+                                placeholder="e.g., New York"
+                                class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333; focus:ring-color: #00ff41;"
+                            />
+                        </div>
+
+                        <div>
+                            <label for="destination" class="block text-sm font-semibold mb-2" style="color: #00ff41;">
+                                🛬 Destination City
+                            </label>
+                            <input
+                                type="text"
+                                id="destination"
+                                name="destination"
+                                required
+                                placeholder="e.g., Salem"
+                                class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                            />
+                        </div>
+
+                        <div>
+                            <label for="startDate" class="block text-sm font-semibold mb-2" style="color: #00ff41;">
+                                📅 Start Date
+                            </label>
+                            <input
+                                type="date"
+                                id="startDate"
+                                name="startDate"
+                                required
+                                class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                            />
+                        </div>
+
+                        <div>
+                            <label for="endDate" class="block text-sm font-semibold mb-2" style="color: #00ff41;">
+                                📅 End Date
+                            </label>
+                            <input
+                                type="date"
+                                id="endDate"
+                                name="endDate"
+                                required
+                                class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Budget Allocation -->
+                    <div class="border-t pt-6" style="border-color: #333333;">
+                        <h3 class="text-lg font-bold mb-4 purple-glow" style="color: #8b00ff;">
+                            💰 Budget Thresholds
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="totalBudget" class="block text-sm font-semibold mb-2" style="color: #ffffff;">
+                                    Total Budget ($)
+                                </label>
+                                <input
+                                    type="number"
+                                    id="totalBudget"
+                                    name="totalBudget"
+                                    value="2000"
+                                    min="0"
+                                    step="50"
+                                    required
+                                    class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                    style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="flightBudget" class="block text-sm font-semibold mb-2" style="color: #ffffff;">
+                                    ✈️ Flight Budget ($)
+                                </label>
+                                <input
+                                    type="number"
+                                    id="flightBudget"
+                                    name="flightBudget"
+                                    value="800"
+                                    min="0"
+                                    step="50"
+                                    required
+                                    class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                    style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="hotelBudgetPerNight" class="block text-sm font-semibold mb-2" style="color: #ffffff;">
+                                    🏨 Hotel per Night ($)
+                                </label>
+                                <input
+                                    type="number"
+                                    id="hotelBudgetPerNight"
+                                    name="hotelBudgetPerNight"
+                                    value="150"
+                                    min="0"
+                                    step="10"
+                                    required
+                                    class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                    style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="carBudgetPerDay" class="block text-sm font-semibold mb-2" style="color: #ffffff;">
+                                    🚗 Car per Day ($)
+                                </label>
+                                <input
+                                    type="number"
+                                    id="carBudgetPerDay"
+                                    name="carBudgetPerDay"
+                                    value="50"
+                                    min="0"
+                                    step="5"
+                                    required
+                                    class="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+                                    style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333333;"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button
+                        type="submit"
+                        class="w-full py-4 px-6 rounded-lg font-bold text-lg transition transform hover:scale-105 animate-pulse-glow"
+                        style="background-color: #00ff41; color: #0a0a0a;"
+                    >
+                        🤖 ACTIVATE AGENT 🤖
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-12">
+            <div class="p-6 rounded-lg text-center" style="background-color: #1a1a1a; border: 1px solid #333333;">
+                <div class="text-3xl mb-2">⚡</div>
+                <h3 class="font-bold mb-2" style="color: #00ff41;">Real-time Hunting</h3>
+                <p class="text-sm text-gray-400">Agent checks every 30 seconds</p>
+            </div>
+
+            <div class="p-6 rounded-lg text-center" style="background-color: #1a1a1a; border: 1px solid #333333;">
+                <div class="text-3xl mb-2">🎯</div>
+                <h3 class="font-bold mb-2" style="color: #8b00ff;">Smart Targeting</h3>
+                <p class="text-sm text-gray-400">Only alerts on budget matches</p>
+            </div>
+
+            <div class="p-6 rounded-lg text-center" style="background-color: #1a1a1a; border: 1px solid #333333;">
+                <div class="text-3xl mb-2">📊</div>
+                <h3 class="font-bold mb-2" style="color: #00ff41;">Price History</h3>
+                <p class="text-sm text-gray-400">Track deals over time</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-sm text-gray-500">
+            <p>Built for Night of the Living Agents Hackathon 2024 👻</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('agentForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target as HTMLFormElement);
+            const tripDetails = {
+                origin: formData.get('origin') as string,
+                destination: formData.get('destination') as string,
+                startDate: formData.get('startDate') as string,
+                endDate: formData.get('endDate') as string,
+                totalBudget: Number(formData.get('totalBudget')),
+                flightBudget: Number(formData.get('flightBudget')),
+                hotelBudgetPerNight: Number(formData.get('hotelBudgetPerNight')),
+                carBudgetPerDay: Number(formData.get('carBudgetPerDay')),
+            };
+
+            // Store in localStorage
+            localStorage.setItem('tripDetails', JSON.stringify(tripDetails));
+
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
+        });
+
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        const startDateInput = document.getElementById('startDate') as HTMLInputElement;
+        const endDateInput = document.getElementById('endDate') as HTMLInputElement;
+
+        if (startDateInput) startDateInput.min = today;
+        if (endDateInput) endDateInput.min = today;
+
+        // Update end date min when start date changes
+        startDateInput?.addEventListener('change', (e) => {
+            const target = e.target as HTMLInputElement;
+            if (endDateInput) endDateInput.min = target.value;
+        });
+    </script>
+</body>
+</html>

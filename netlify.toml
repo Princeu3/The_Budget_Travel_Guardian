@@ -1,0 +1,13 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[functions]
+  directory = "netlify/functions"
+
+[dev]
+  framework = "#custom"
+  command = "npm run dev"
+  targetPort = 4321
+  publish = "dist"
+  autoLaunch = false
