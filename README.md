@@ -129,11 +129,189 @@ Visit [localhost:8888](http://localhost:8888) to see the app running locally.
            │    ├─> /api/get-price-history (Historical data)
            │    └─> /api/agent (AI chat interface)
            │
+           ├──> Perplexity AI (Sonar API)
+           │    └─> Real-time travel price search
+           │         ├─> Domain-filtered searches
+           │         ├─> Booking URL extraction
+           │         └─> Price intelligence
+           │
            └──> Raindrop AI Infrastructure
                 ├──> SmartMemory (Agent state & preferences)
                 ├──> SmartSQL (Price history storage)
                 └──> SmartBucket (Document search)
 ```
+
+### 🔍 Perplexity AI Integration
+
+Travel Guardian uses **Perplexity AI's Sonar API** as its intelligent search engine to find real-time travel prices across the web. Here's how it works:
+
+#### Why Perplexity?
+
+Perplexity's Sonar models are specifically designed for **real-time web search with AI-powered understanding**:
+
+- **Fresh Data**: Unlike traditional LLMs, Sonar searches the live web for current prices
+- **Source URLs**: Returns actual booking links from travel sites
+- **Smart Parsing**: Understands travel industry terminology and price formats
+- **Domain Filtering**: Can focus searches on trusted travel booking platforms
+
+#### Search Strategy
+
+Each price check performs **3 parallel searches** with optimized prompts:
+
+**1. Flight Search**
+```typescript
+Query: "Find the cheapest flight prices from [Origin] to [Destination] 
+departing on [Date]. Search only travel booking sites (Kayak, Expedia, 
+Google Flights, Skyscanner). Provide specific dollar amounts, airline 
+names, and direct booking links."
+
+Domain Filter: ['expedia.com', 'kayak.com', 'skyscanner.com', 
+'google.com/flights', 'united.com', 'delta.com', ...]
+```
+
+**2. Hotel Search**
+```typescript
+Query: "Find the cheapest hotel rates per night in [Destination] for 
+check-in date [Date]. Search only hotel booking sites (Booking.com, 
+Hotels.com, Expedia). Provide specific nightly rates, hotel names, 
+star ratings, and direct booking URLs."
+
+Domain Filter: ['booking.com', 'expedia.com', 'hotels.com', 
+'priceline.com', 'marriott.com', 'hilton.com', ...]
+```
+
+**3. Car Rental Search**
+```typescript
+Query: "Find the cheapest car rental rates per day in [Destination] 
+for pickup date [Date]. Search only car rental booking sites 
+(Enterprise, Hertz, Avis, Budget, Kayak). Provide specific daily 
+rates, rental company names, car types, and direct booking URLs."
+
+Domain Filter: ['enterprise.com', 'hertz.com', 'avis.com', 
+'budget.com', 'kayak.com', 'expedia.com', ...]
+```
+
+#### Advanced Preferences
+
+Power users can specify detailed preferences that enhance the search queries:
+
+**Flight Preferences:**
+- Direct vs. connecting flights
+- Preferred airlines (Delta, United, Southwest, etc.)
+- Time of day (morning, afternoon, evening, red-eye)
+- Extra legroom requirements
+- Baggage count
+
+**Hotel Preferences:**
+- Star rating (3★, 4★, 5★)
+- Room type (single, double, suite)
+- Required amenities (WiFi, breakfast, pool, gym, parking)
+- Cancellation policy flexibility
+
+**Car Rental Preferences:**
+- Vehicle type (economy, SUV, luxury, etc.)
+- Transmission type (automatic/manual)
+- Mileage limits (unlimited/limited)
+- Features (GPS, Bluetooth, backup camera)
+
+These preferences are intelligently incorporated into search queries:
+
+```typescript
+Example Enhanced Query:
+"Find the cheapest flight prices from Los Angeles to Miami...
+Preferences: direct flights only, Prefer airlines: Delta, United, 
+with extra legroom seats, morning departure time, including 2 checked bag(s)."
+```
+
+#### Data Extraction
+
+Perplexity responses are parsed to extract:
+
+1. **Prices**: Multiple regex patterns handle various formats
+   - `$500`, `500 USD`, `from $500`, `price: $500`
+   - Extracts the **lowest price** found across all sources
+
+2. **Booking URLs**: Direct links to book on travel sites
+   - Extracted from search results
+   - Up to 3 URLs per service
+   - Displayed with domain names for easy recognition
+
+3. **Service Details**:
+   - **Airlines**: Pattern matching for major carriers
+   - **Hotels**: Recognition of hotel chains
+   - **Car Types**: Identification of vehicle categories
+
+#### API Configuration
+
+```typescript
+// Environment Variable Required
+PERPLEXITY_API_KEY=pplx-xxxxxxxxxxxxx
+
+// API Settings
+Model: "sonar"                    // Real-time search model
+Max Results: 5                    // Top 5 sources per query
+Max Tokens Per Page: 512          // Focused content extraction
+Search Domain Filter: [...]       // 15-20 trusted domains per category
+```
+
+#### Rate Limiting & Optimization
+
+- **Parallel Execution**: All 3 searches run simultaneously
+- **Smart Caching**: Results cached for dashboard display
+- **Error Handling**: Graceful fallback to simulated prices
+- **Token Efficiency**: Focused queries minimize token usage
+
+#### Example Response Flow
+
+```
+User Input:
+  Origin: "San Francisco"
+  Destination: "New York"
+  Date: "2024-12-20"
+  
+↓ Perplexity Search
+
+Sonar API Response:
+  Results: [
+    {
+      title: "$250 Flights from SFO to JFK - Kayak",
+      url: "https://www.kayak.com/flights/SFO-JFK/...",
+      snippet: "Find cheap flights from San Francisco to 
+                New York for $250 on Delta, United..."
+    },
+    ...
+  ]
+  
+↓ Data Extraction
+
+Parsed Data:
+  Price: $250 (lowest found)
+  Carrier: "Delta" (extracted from text)
+  Booking URLs: [
+    "https://www.kayak.com/flights/SFO-JFK/...",
+    "https://www.expedia.com/Flights-Search?...",
+    "https://www.google.com/travel/flights/..."
+  ]
+  
+↓ Dashboard Display
+
+User sees:
+  💰 $250 ✅ Within Budget
+  ✈️ Delta Airlines
+  🔗 Book Now:
+     1. kayak.com
+     2. expedia.com
+     3. google.com/travel
+```
+
+#### Benefits of Perplexity Integration
+
+✅ **Real-Time Data**: Always current prices from live web searches  
+✅ **Direct Booking**: Actual URLs to complete purchases  
+✅ **Multi-Source**: Aggregates from 15-20 sites per category  
+✅ **AI Intelligence**: Understands context and travel terminology  
+✅ **Domain Focus**: Only searches trusted travel platforms  
+✅ **Fast Results**: Optimized queries return in 2-5 seconds
 
 ### Key Components
 
@@ -169,6 +347,10 @@ RAINDROP_APPLICATION_VERSION  # Version identifier
 - **[React](https://react.dev)** - Interactive UI components
 - **[Tailwind CSS](https://tailwindcss.com)** - Utility-first styling
 - **[Netlify](https://netlify.com)** - Hosting, serverless functions, edge functions
+- **[Perplexity AI](https://www.perplexity.ai)** - Real-time web search and price intelligence
+  - Sonar API - Live travel price searches
+  - Domain filtering - Focused on trusted booking sites
+  - URL extraction - Direct booking links
 - **[Raindrop](https://liquidmetal.ai)** - AI infrastructure platform
   - SmartMemory - Agent state and preference management
   - SmartSQL - Structured price data storage
