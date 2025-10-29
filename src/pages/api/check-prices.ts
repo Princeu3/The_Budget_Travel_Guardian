@@ -147,13 +147,33 @@ async function searchPerplexity(query: string, searchType: 'flights' | 'hotels' 
 
 /**
  * Extract price from Perplexity response text
+ * Enhanced to handle multiple price formats
  */
 function extractPrice(text: string, fallbackMin: number, fallbackMax: number): number {
-  // Look for price patterns like $500, $1,200, etc.
-  const priceMatch = text.match(/\$(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
-  if (priceMatch) {
-    const price = parseFloat(priceMatch[1].replace(/,/g, ''));
-    if (price > 0) return Math.round(price);
+  // Try multiple price patterns for better extraction
+  const patterns = [
+    /\$(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g,  // $500, $1,200.50
+    /(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*(?:USD|dollars?)/gi,  // 500 USD, 1200 dollars
+    /price[:\s]+\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/gi,  // price: $500
+    /(?:from|starting at|as low as)[:\s]+\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/gi,  // from $500
+  ];
+
+  let prices: number[] = [];
+  
+  for (const pattern of patterns) {
+    const matches = text.matchAll(pattern);
+    for (const match of matches) {
+      const priceStr = match[1].replace(/,/g, '');
+      const price = parseFloat(priceStr);
+      if (price > 0 && price >= fallbackMin * 0.3 && price <= fallbackMax * 3) {
+        prices.push(Math.round(price));
+      }
+    }
+  }
+
+  // Return the lowest price found, or fallback
+  if (prices.length > 0) {
+    return Math.min(...prices);
   }
 
   // Fallback to random price in range
@@ -181,7 +201,11 @@ function extractBookingUrls(searchResult: any): string[] {
  * Check flight prices using Perplexity API
  */
 async function checkFlightPrices(origin: string, destination: string, startDate: string): Promise<any> {
-  const query = `What is the current average flight price from ${origin} to ${destination} for travel on ${startDate}? Include airline options.`;
+  // Optimized query with specific instructions for better results
+  const query = `Find the cheapest flight prices from ${origin} to ${destination} departing on ${startDate}. 
+Search only travel booking sites (Kayak, Expedia, Google Flights, Skyscanner).
+Provide specific dollar amounts, airline names, and direct booking links.
+Format: "$XXX on [Airline] via [booking site URL]"`;
 
   console.log(`🔍 Searching flights: ${query}`);
   const searchResult = await searchPerplexity(query, 'flights');
@@ -193,9 +217,11 @@ async function checkFlightPrices(origin: string, destination: string, startDate:
     const price = extractPrice(text, 400, 900);
     const bookingUrls = extractBookingUrls(searchResult);
 
-    // Extract airline from response or use defaults
-    const airlines = ['United', 'Delta', 'American', 'Southwest', 'JetBlue'];
-    const airline = airlines[Math.floor(Math.random() * airlines.length)];
+    // Extract airline from response with better pattern matching
+    const airlines = ['United', 'Delta', 'American', 'Southwest', 'JetBlue', 'Alaska', 'Spirit', 'Frontier'];
+    const airlinePattern = new RegExp(airlines.join('|'), 'i');
+    const airlineMatch = text.match(airlinePattern);
+    const airline = airlineMatch ? airlineMatch[0] : airlines[Math.floor(Math.random() * airlines.length)];
 
     return {
       price,
@@ -234,7 +260,11 @@ async function checkFlightPrices(origin: string, destination: string, startDate:
  * Check hotel prices using Perplexity API
  */
 async function checkHotelPrices(destination: string, startDate: string): Promise<any> {
-  const query = `What is the average hotel price per night in ${destination} for ${startDate}? Include hotel names and star ratings.`;
+  // Optimized query for specific pricing and booking information
+  const query = `Find the cheapest hotel rates per night in ${destination} for check-in date ${startDate}.
+Search only hotel booking sites (Booking.com, Hotels.com, Expedia, Kayak, Trivago).
+Provide specific nightly rates (price per night), hotel names, star ratings, and direct booking URLs.
+Format: "$XXX/night at [Hotel Name] ([X] stars) - [booking URL]"`;
 
   console.log(`🔍 Searching hotels: ${query}`);
   const searchResult = await searchPerplexity(query, 'hotels');
@@ -246,8 +276,11 @@ async function checkHotelPrices(destination: string, startDate: string): Promise
     const pricePerNight = extractPrice(text, 80, 280);
     const bookingUrls = extractBookingUrls(searchResult);
 
-    const hotelNames = ['Marriott', 'Hilton', 'Hyatt', 'Holiday Inn', 'Best Western', 'Sheraton'];
-    const name = hotelNames[Math.floor(Math.random() * hotelNames.length)];
+    // Extract hotel name from response with better pattern matching
+    const hotelNames = ['Marriott', 'Hilton', 'Hyatt', 'Holiday Inn', 'Best Western', 'Sheraton', 'DoubleTree', 'Courtyard', 'Hampton Inn', 'Fairfield Inn'];
+    const hotelPattern = new RegExp(hotelNames.join('|'), 'i');
+    const hotelMatch = text.match(hotelPattern);
+    const name = hotelMatch ? hotelMatch[0] : hotelNames[Math.floor(Math.random() * hotelNames.length)];
 
     return {
       pricePerNight,
@@ -286,7 +319,11 @@ async function checkHotelPrices(destination: string, startDate: string): Promise
  * Check car rental prices using Perplexity API
  */
 async function checkCarPrices(destination: string, startDate: string): Promise<any> {
-  const query = `What is the average car rental price per day in ${destination} for ${startDate}? Include rental companies.`;
+  // Optimized query for car rental pricing with specific requirements
+  const query = `Find the cheapest car rental rates per day in ${destination} for pickup date ${startDate}.
+Search only car rental booking sites (Enterprise, Hertz, Avis, Budget, Kayak, Expedia).
+Provide specific daily rates (price per day), rental company names, car types (economy, compact, etc.), and direct booking URLs.
+Format: "$XX/day for [Car Type] from [Company] - [booking URL]"`;
 
   console.log(`🔍 Searching car rentals: ${query}`);
   const searchResult = await searchPerplexity(query, 'cars');
@@ -298,8 +335,11 @@ async function checkCarPrices(destination: string, startDate: string): Promise<a
     const pricePerDay = extractPrice(text, 30, 100);
     const bookingUrls = extractBookingUrls(searchResult);
 
-    const carTypes = ['Economy', 'Compact', 'Mid-size', 'Full-size', 'SUV'];
-    const type = carTypes[Math.floor(Math.random() * carTypes.length)];
+    // Extract car type from response with better pattern matching
+    const carTypes = ['Economy', 'Compact', 'Mid-size', 'Midsize', 'Full-size', 'SUV', 'Standard', 'Intermediate'];
+    const carPattern = new RegExp(carTypes.join('|'), 'i');
+    const carMatch = text.match(carPattern);
+    const type = carMatch ? carMatch[0] : carTypes[Math.floor(Math.random() * carTypes.length)];
 
     return {
       pricePerDay,
