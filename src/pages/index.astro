@@ -202,13 +202,183 @@ import '../styles/globals.css';
                         </div>
                     </div>
 
+                    <!-- Advanced Options (Collapsible) -->
+                    <div class="border-t pt-6" style="border-color: #333333;">
+                        <button
+                            type="button"
+                            id="advancedToggle"
+                            class="w-full flex justify-between items-center text-left font-bold mb-4 purple-glow hover:opacity-80 transition"
+                            style="color: #8b00ff;"
+                        >
+                            <span>⚙️ Advanced Preferences (Optional)</span>
+                            <span id="advancedIcon">▼</span>
+                        </button>
+
+                        <div id="advancedOptions" class="hidden space-y-6">
+                            <!-- Flight Preferences -->
+                            <div class="p-4 rounded-lg" style="background-color: #0f0f0f; border: 1px solid #333;">
+                                <h4 class="font-bold mb-3" style="color: #00ff41;">✈️ Flight Preferences</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Flight Stops</label>
+                                        <select name="flightStops" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="any">Any</option>
+                                            <option value="direct">Direct Only</option>
+                                            <option value="one-stop">One Stop Max</option>
+                                            <option value="multi-stop">Multi-Stop OK</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Time of Day</label>
+                                        <select name="flightTimeOfDay" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="any">Any Time</option>
+                                            <option value="morning">Morning (6 AM - 12 PM)</option>
+                                            <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
+                                            <option value="evening">Evening (6 PM - 12 AM)</option>
+                                            <option value="red-eye">Red-eye (12 AM - 6 AM)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Preferred Airlines</label>
+                                        <input type="text" name="flightAirlines" placeholder="e.g., Delta, United" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;" />
+                                        <span class="text-xs text-gray-500">Comma separated</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Checked Bags</label>
+                                        <input type="number" name="flightBaggage" min="0" max="5" value="1" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;" />
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="flex items-center text-sm" style="color: #ffffff;">
+                                            <input type="checkbox" name="flightExtraLegroom" class="mr-2" />
+                                            Extra Legroom Required
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hotel Preferences -->
+                            <div class="p-4 rounded-lg" style="background-color: #0f0f0f; border: 1px solid #333;">
+                                <h4 class="font-bold mb-3" style="color: #00ff41;">🏨 Hotel Preferences</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Star Rating (Minimum)</label>
+                                        <select name="hotelStarRating" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="0">Any</option>
+                                            <option value="3">3 Stars ⭐⭐⭐</option>
+                                            <option value="4">4 Stars ⭐⭐⭐⭐</option>
+                                            <option value="5">5 Stars ⭐⭐⭐⭐⭐</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Room Type</label>
+                                        <select name="hotelRoomType" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="any">Any</option>
+                                            <option value="single">Single</option>
+                                            <option value="double">Double</option>
+                                            <option value="suite">Suite</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Cancellation Policy</label>
+                                        <select name="hotelCancellation" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="any">Any</option>
+                                            <option value="flexible">Flexible (Free cancellation)</option>
+                                            <option value="moderate">Moderate</option>
+                                            <option value="strict">Strict (Best price)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Required Amenities</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="hotelWifi" value="wifi" class="mr-2" />
+                                                Free WiFi
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="hotelBreakfast" value="breakfast" class="mr-2" />
+                                                Breakfast Included
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="hotelPool" value="pool" class="mr-2" />
+                                                Pool
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="hotelGym" value="gym" class="mr-2" />
+                                                Gym
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="hotelParking" value="parking" class="mr-2" />
+                                                Free Parking
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Car Rental Preferences -->
+                            <div class="p-4 rounded-lg" style="background-color: #0f0f0f; border: 1px solid #333;">
+                                <h4 class="font-bold mb-3" style="color: #00ff41;">🚗 Car Rental Preferences</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Vehicle Type</label>
+                                        <select name="carVehicleType" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="any">Any</option>
+                                            <option value="economy">Economy</option>
+                                            <option value="compact">Compact</option>
+                                            <option value="midsize">Midsize</option>
+                                            <option value="fullsize">Full-size</option>
+                                            <option value="suv">SUV</option>
+                                            <option value="luxury">Luxury</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Transmission</label>
+                                        <select name="carTransmission" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="any">Any</option>
+                                            <option value="automatic">Automatic</option>
+                                            <option value="manual">Manual</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Mileage</label>
+                                        <select name="carMileage" class="w-full px-3 py-2 rounded-lg text-sm" style="background-color: #1a1a1a; color: #ffffff; border: 1px solid #333;">
+                                            <option value="unlimited">Unlimited</option>
+                                            <option value="limited">Limited (Cheaper)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="block text-sm mb-2" style="color: #ffffff;">Features</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="carGPS" value="gps" class="mr-2" />
+                                                GPS Navigation
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="carBluetooth" value="bluetooth" class="mr-2" />
+                                                Bluetooth
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="carBackupCamera" value="backup-camera" class="mr-2" />
+                                                Backup Camera
+                                            </label>
+                                            <label class="flex items-center text-xs">
+                                                <input type="checkbox" name="carUSB" value="usb" class="mr-2" />
+                                                USB Ports
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <button
                         type="submit"
                         class="w-full py-4 px-6 rounded-lg font-bold text-lg transition transform hover:scale-105 animate-pulse-glow"
                         style="background-color: #00ff41; color: #0a0a0a;"
                     >
-                        🤖 ACTIVATE AGENT 🤖
+                        🤖 ACTIVATE GUARDIAN 🤖
                     </button>
                 </form>
             </div>
@@ -242,11 +412,27 @@ import '../styles/globals.css';
     </div>
 
     <script>
+        // Toggle advanced options
+        document.getElementById('advancedToggle')?.addEventListener('click', () => {
+            const options = document.getElementById('advancedOptions');
+            const icon = document.getElementById('advancedIcon');
+            
+            if (options?.classList.contains('hidden')) {
+                options.classList.remove('hidden');
+                if (icon) icon.textContent = '▲';
+            } else {
+                options?.classList.add('hidden');
+                if (icon) icon.textContent = '▼';
+            }
+        });
+
         document.getElementById('guardianForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const formData = new FormData(e.target as HTMLFormElement);
-            const tripDetails = {
+            
+            // Build basic trip details
+            const tripDetails: any = {
                 origin: formData.get('origin') as string,
                 destination: formData.get('destination') as string,
                 startDate: formData.get('startDate') as string,
@@ -256,6 +442,59 @@ import '../styles/globals.css';
                 hotelBudgetPerNight: Number(formData.get('hotelBudgetPerNight')),
                 carBudgetPerDay: Number(formData.get('carBudgetPerDay')),
             };
+
+            // Build flight preferences if any are set
+            const flightStops = formData.get('flightStops') as string;
+            const flightTimeOfDay = formData.get('flightTimeOfDay') as string;
+            const flightAirlines = formData.get('flightAirlines') as string;
+            const flightBaggage = formData.get('flightBaggage') as string;
+            const flightExtraLegroom = formData.get('flightExtraLegroom') as string;
+
+            if (flightStops !== 'any' || flightTimeOfDay !== 'any' || flightAirlines || flightBaggage || flightExtraLegroom) {
+                tripDetails.flightPreferences = {};
+                if (flightStops !== 'any') tripDetails.flightPreferences.stops = flightStops;
+                if (flightTimeOfDay !== 'any') tripDetails.flightPreferences.timeOfDay = flightTimeOfDay;
+                if (flightAirlines) tripDetails.flightPreferences.preferredAirlines = flightAirlines.split(',').map((a: string) => a.trim());
+                if (flightBaggage) tripDetails.flightPreferences.baggageCount = Number(flightBaggage);
+                if (flightExtraLegroom) tripDetails.flightPreferences.extraLegroom = true;
+            }
+
+            // Build hotel preferences
+            const hotelStarRating = Number(formData.get('hotelStarRating'));
+            const hotelRoomType = formData.get('hotelRoomType') as string;
+            const hotelCancellation = formData.get('hotelCancellation') as string;
+            const hotelAmenities = [];
+            if (formData.get('hotelWifi')) hotelAmenities.push('wifi');
+            if (formData.get('hotelBreakfast')) hotelAmenities.push('breakfast');
+            if (formData.get('hotelPool')) hotelAmenities.push('pool');
+            if (formData.get('hotelGym')) hotelAmenities.push('gym');
+            if (formData.get('hotelParking')) hotelAmenities.push('parking');
+
+            if (hotelStarRating > 0 || hotelRoomType !== 'any' || hotelCancellation !== 'any' || hotelAmenities.length > 0) {
+                tripDetails.hotelPreferences = {};
+                if (hotelStarRating > 0) tripDetails.hotelPreferences.starRating = hotelStarRating;
+                if (hotelRoomType !== 'any') tripDetails.hotelPreferences.roomType = hotelRoomType;
+                if (hotelCancellation !== 'any') tripDetails.hotelPreferences.cancellationPolicy = hotelCancellation;
+                if (hotelAmenities.length > 0) tripDetails.hotelPreferences.amenities = hotelAmenities;
+            }
+
+            // Build car rental preferences
+            const carVehicleType = formData.get('carVehicleType') as string;
+            const carTransmission = formData.get('carTransmission') as string;
+            const carMileage = formData.get('carMileage') as string;
+            const carFeatures = [];
+            if (formData.get('carGPS')) carFeatures.push('gps');
+            if (formData.get('carBluetooth')) carFeatures.push('bluetooth');
+            if (formData.get('carBackupCamera')) carFeatures.push('backup-camera');
+            if (formData.get('carUSB')) carFeatures.push('usb');
+
+            if (carVehicleType !== 'any' || carTransmission !== 'any' || carMileage || carFeatures.length > 0) {
+                tripDetails.carRentalPreferences = {};
+                if (carVehicleType !== 'any') tripDetails.carRentalPreferences.vehicleType = carVehicleType;
+                if (carTransmission !== 'any') tripDetails.carRentalPreferences.transmission = carTransmission;
+                if (carMileage) tripDetails.carRentalPreferences.mileage = carMileage;
+                if (carFeatures.length > 0) tripDetails.carRentalPreferences.features = carFeatures;
+            }
 
             // Store in localStorage
             localStorage.setItem('tripDetails', JSON.stringify(tripDetails));
